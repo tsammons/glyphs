@@ -1,0 +1,41 @@
+body {
+    background-color: rgb(34, 34, 34); //#313639;
+}
+
+.wrapper {
+    display:flex; 
+    flex-direction: column; 
+    width: 100vw; 
+    height: 100vh; 
+    align-items: center; 
+    justify-content: center;
+}
+
+#output {
+    display: none;
+}
+
+#testDisplay {
+    display: none;
+}
+
+#myCanvas {
+    background-color: white; 
+    display: none;
+}
+
+#unicodeDisplay {
+    color: rgba(248, 240, 227, 0.75);
+    width: 300px; 
+    height: 300px; 
+    font-size: 160px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+#unicodeInfo {
+    color: rgba(248, 240, 227, 0.75);
+    font-size: 20px; 
+    padding-top: 30px
+}
