@@ -1,14 +1,15 @@
 "use strict";
-var ctx, canvas;
 var displayLength = 1200;
-var fadeTime = 10; //200; //displayLength / 7;
+var fadeTime = 150;
 var filteredItems = null;
 var filter = null; //"TETRAGRAM";//"CUNEIFORM"; //"ALCHEMICAL"; //"EGYPTIAN HIEROGLYPH";
 
-var translateInterval = 20;
-var divHeight = 90;
+var divHeight = 80;
+var lastGlyphRender = null;
+var lastTick = null;
+var fadeOutInProgress = false;
+var fadeInInProgress = false;
 var translation = 0;
-var timeStampTracker = null;
 
 display();
 
@@ -19,31 +20,79 @@ function display() {
     displayDiv.style.transition = "opacity " + transitionTime + "s";
     infoDiv.style.transition = "opacity " + transitionTime + "s";
 
-    
-    setTimeout(() => {
-        unicodeDisplay();
-        //translatePanel();
-    }, 1);
+    window.requestAnimationFrame(tick);
 }
 
-function unicodeDisplay() {
+function tick() {
     var displayDiv = document.getElementById("unicodeDisplay");
     var infoDiv = document.getElementById("unicodeInfo");
-    displayDiv.style.opacity = "1";
-    infoDiv.style.opacity = "1";
-    fader();
+    var panelItems = document.getElementById("panelItems");
+    var currentTime = Date.now();
 
+
+    if (lastGlyphRender !== null) {
+        var timeSince = currentTime - lastGlyphRender;
+
+        // fade out
+        if (!fadeOutInProgress && timeSince < displayLength && timeSince >= (displayLength - fadeTime)) {
+            fadeOutInProgress = true;
+            displayDiv.style.opacity = 0;
+            infoDiv.style.opacity = 0;
+
+        }
+        // fade in
+        if (!fadeInInProgress && timeSince > 0 && timeSince <= fadeTime) {
+            fadeOutInProgress = false;
+            fadeInInProgress = true;
+            displayDiv.style.opacity = 1;
+            infoDiv.style.opacity = 1;
+        }
+        if (fadeInInProgress && timeSince > fadeTime) {
+            fadeInInProgress = false;
+        }
+
+        // render new glyph
+        if (timeSince >= displayLength) {
+            var glyph = getGlyph();
+            displayDiv.innerHTML = glyph.htmlCode;
+            infoDiv.innerHTML = glyph.info;
+    
+            addPanelElement(displayDiv.innerHTML);
+
+            lastGlyphRender = currentTime;
+            lastTick = currentTime;
+        }
+
+        // animate side panel
+        if (lastTick !== null) {
+            var timeElapsed = currentTime - lastTick;
+            var stepSize = (timeElapsed / displayLength) * divHeight;
+
+            translation += stepSize;
+            panelItems.style.transform = "translateY( " + translation + "px)";
+
+            lastTick = currentTime;
+        }
+
+    } else {
+        // add
+        var glyph = getGlyph();
+        displayDiv.innerHTML = glyph.htmlCode;
+        infoDiv.innerHTML = glyph.info;
+
+        addPanelElement(displayDiv.innerHTML);
+
+        lastGlyphRender = currentTime;
+        lastTick = currentTime;
+    }
+
+    window.requestAnimationFrame(tick);
+}
+
+function getGlyph() {
     var nextSymbol = getNextSymbol(filter);
     var htmlCode = "&#x" + nextSymbol[0] + ";";
-    displayDiv.innerHTML = htmlCode;
-    infoDiv.innerHTML = nextSymbol[1];
-    //addPanelElement(displayDiv.innerHTML);
-
-    console.log(displayDiv.innerText, htmlCode);
-    console.log(nextSymbol[1]);
-    console.log(" ");
-
-    setTimeout(unicodeDisplay, displayLength);
+    return {htmlCode: htmlCode, info: nextSymbol[1]}
 }
 
 function getNextSymbol(filter = null) {
@@ -62,169 +111,29 @@ function getNextSymbol(filter = null) {
     return char.split(";");
 }
 
-function fader() {
-    setTimeout(() => {
-        var displayDiv = document.getElementById("unicodeDisplay");
-        var infoDiv = document.getElementById("unicodeInfo");
-        displayDiv.style.opacity = 0;
-        infoDiv.style.opacity = 0;
-    }, displayLength - fadeTime);
-}
-
-function translatePanel() {
-    var panelItems = document.getElementById("panelItems");
-    var stepSize = divHeight / (displayLength / translateInterval);
-
-    var myInterval = setInterval(() => {
-        var currentTime = Date.now();
-
-        
-        if (timeStampTracker !== null) {
-            var timeDiff = currentTime - timeStampTracker;
-            stepSize = (timeDiff / displayLength) * divHeight;
-        }
-
-        translation += stepSize;
-        panelItems.style.transform = "translateY( " + translation + "px)";
-        timeStampTracker = currentTime;
-    }, translateInterval)
-}
-
 function addPanelElement(glyph) {
+    var panelItems = document.getElementById("panelItems");
+    var panelTop = panelItems.getBoundingClientRect().top;
+    
     var newDiv = document.createElement("div");
+    newDiv.style.fontSize = "32px";
+    newDiv.style.color = "rgb(139, 0, 0)";
+    newDiv.style.height = "80px";
+    newDiv.style.width = "100%";
+    newDiv.style.display = "flex";
+    newDiv.style.alignItems = "center";
+    newDiv.style.justifyContent = "center";
+    newDiv.style.overflow = "hidden";
+
     var text = document.createTextNode(glyph);
     newDiv.appendChild(text);
-    newDiv.style.padding = "20px 5px 20px 5px";
-    newDiv.style.fontSize = "36px"
 
-    var panelItems = document.getElementById("panelItems");
     panelItems.prepend(newDiv);
-
     divHeight = newDiv.getBoundingClientRect().height;
-    translation -= divHeight;
-    panelItems.style.transform = "translateY( " + translation + "px)";
-}
+    var toTranslate = (-divHeight) - panelTop;
 
-function setupCanvas() {
-    canvas = document.getElementById('myCanvas');
-    ctx = myCanvas.getContext('2d');
-    ctx.fillStyle = "rgba(255, 0, 0, 1)"
-    ctx.font = "36px serif"
-}
-
-function retrieveAvailableSymbol() {
-    var testDisplay = document.getElementById("testDisplay");
-
-    var nextSymbol = getUnicode();
-    var htmlCode = "&#x" + nextSymbol[0] + ";";
-    testDisplay.innerHTML = htmlCode;
-
-    var isMissing = isMissingGlyph(testDisplay.innerHTML);
-
-    if (isMissing) {
-        console.log("woops");
-        return undefined;
-    } else {
-        return {symbol: htmlCode, info: nextSymbol[1]};
-    }
-}
-
-function processUnicodeData() {
-    var missingGlyphs = [];
-    var availableGlyphs = [];
-
-    var testDisplay = document.getElementById("testDisplay");
-    var output = document.getElementById("output");
-
-    for (var i = 0; i < unicodeData.data.length; i++) {
-        if (i % 2000 === 0) {
-            console.log(i);
-        }
-
-        var unicodeRow = unicodeData.data[i];
-        var uniChar = unicodeRow.split(";")[0];
-        var htmlCode = "&#x" + uniChar + ";";
-        testDisplay.innerHTML = htmlCode;
-    
-        var isMissing = isMissingGlyph(testDisplay.innerHTML);
-        if (isMissing) {
-            missingGlyphs.push(unicodeRow)
-        } else {
-            availableGlyphs.push(unicodeRow);
-        }
-     }
-
-     output.value = JSON.stringify(missingGlyphs);
-}
-
-function isMissingGlyph(innerText) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillText(innerText, 0, 36);
-    
-    var imgData = 
-        ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    
-    var coloredIndices = [];
-    var sideWidth = 5;
-
-    var minX = -1;
-    var minY = -1;
-    var maxX = -1;
-    var maxY = -1;
-
-    // find min / max values of all colored pixels
-    for (var i = 0; i < imgData.length; i += 4) {
-        if (imgData[i] !== 0) {
-
-            var adjustedIndex = i / 4;
-            var x = adjustedIndex % canvas.width;
-            var y = Math.floor(adjustedIndex / canvas.width);
-
-            if (x < minX || minX === -1) {
-                minX = x; 
-            }
-            if (x > maxX || maxX === -1) {
-                maxX = x;
-            }
-            if (y < minY || minY === -1) {
-                minY = y;
-            }
-            if (y > maxY || maxY === -1) {
-                maxY = y;
-            }
-
-            coloredIndices.push({x: x, y: y});
-        }
-    }
-
-    // Check if interor of square is uncolored
-    var hasColorInside = false;
-    var leftBound = minX + sideWidth,
-        rightBound = maxX - sideWidth,
-        topBound = minY + sideWidth,
-        bottomBound = maxY - sideWidth;
-
-    for (var i = 0; i < coloredIndices.length; i++) {
-        var index = coloredIndices[i];
-        if (index.x > leftBound && index.x < rightBound && index.y > topBound && index.y < bottomBound) {
-            hasColorInside =  true;
-        }
-    }
-
-    if (coloredIndices.length === 0) {
-        return true;
-    }
-
-    // given max / min values and the side width, predict area of hollow square
-    var area = 
-        ((maxX - minX) * (maxY - minY)) - 
-        ((maxX - minX - (sideWidth * 2)) * (maxY - minY - (sideWidth * 2)));
-
-    if (coloredIndices.length - 4 === area && !hasColorInside) {
-        return true;
-    }
-
-    return false;
+    translation += toTranslate;
+    panelItems.style.transform = "translateY( " + (translation) + "px)";
 }
 
 var unicodeData = {

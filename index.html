@@ -3,20 +3,29 @@
 <head>
   <title>&#x1685B; &#x1038B; </title>
   <link rel="icon" type="image/x-icon" href="images/favicon.svg">
-  <!-- &#x1D592; &#x131B8; &#xFD65; 𓅳 𓋚 &#x274B; &#x109FF; &#x11044; &#x2908; &#x4DF6; &#x1D1C8;-->
+  <!-- 13090 &#x1D592; &#x131B8; &#xFD65; 𓅳 𓋚 &#x274B; &#x109FF; &#x11044; &#x2908; &#x4DF6; &#x1D1C8;-->
   <meta charset="UTF-32">
 </head>
 <body>
-    <div class="wrapper">
-        <textarea id="output"></textarea>
-        <div id="testDisplay"></div>
-        <canvas width="100" height="100" id="myCanvas"></canvas>
-
-        <div id="sidePanel"></div>
+    <div id="sidePanel">
+      <div id="panelItems">
+        <!--
+        <div style="padding: 20px 5px 20px 5px;">&#x1D592;<code style="padding-left: 5px;">1D592</code></div>
+        <div style="padding: 20px 5px 20px 5px;">&#x1D592;<code style="padding-left: 5px;">1D592</code></div>
+        <div style="padding: 20px 5px 20px 5px;">&#x1D592;<code style="padding-left: 5px;">1D592</code></div>
+        -->
+      </div>
+    </div>
+    <div class="outputWrapper">
         <div id="unicodeDisplay"></div>
         <div id="unicodeInfo"></div>
     </div>
-  <script src='js/script.js'></script>
+
+  <textarea id="output"></textarea>
+  <div id="testDisplay"></div>
+  <canvas width="100" height="100" id="myCanvas"></canvas>
+
+  <script src='js/testLoop.js'></script>
   <link rel="stylesheet" type="text/css" href="css/main.css">
 </body>
 </html>
