@@ -27,7 +27,7 @@ body {
 }
 
 #unicodeDisplay {
-    color: rgb(24, 24, 24); /* rgba(248, 240, 227, 1); */
+    color: rgb(139, 0, 0); /* rgb(24, 24, 24); */ /* rgba(248, 240, 227, 1); */
     width: 300px; 
     height: 300px; 
     font-size: 160px; 
@@ -37,7 +37,7 @@ body {
 }
 
 #unicodeInfo {
-    color: rgb(24, 24, 24); /* rgba(248, 240, 227, 1); */
+    color: rgb(139, 0, 0); /* rgb(24, 24, 24); */ /* rgba(248, 240, 227, 1); */
     font-size: 28px; 
     padding-top: 30px
 }
