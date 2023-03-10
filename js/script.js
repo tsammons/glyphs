@@ -1,20 +1,32 @@
 "use strict";
 var ctx, canvas;
-var displayLength = 1200;
+var displayLength = 2000;
+var fadeTime = 200; //displayLength / 7;
 var filteredItems = null;
-var filter = null; //"ALCHEMICAL"; //"TETRAGRAM"; //"EGYPTIAN HIEROGLYPH";
+var filter = null; //"TETRAGRAM";//"CUNEIFORM"; //"ALCHEMICAL"; //"EGYPTIAN HIEROGLYPH";
 
 display();
 
 function display() {
-    setTimeout(unicodeDisplay, 1);
-    setInterval(unicodeDisplay, displayLength);
+    var displayDiv = document.getElementById("unicodeDisplay");
+    var infoDiv = document.getElementById("unicodeInfo");
+    var transitionTime = fadeTime / 1000;
+    displayDiv.style.transition = "opacity " + transitionTime + "s";
+    infoDiv.style.transition = "opacity " + transitionTime + "s";
+
+    
+    setTimeout(() => {
+        unicodeDisplay();
+    }, 1);;
 }
 
 function unicodeDisplay() {
     var displayDiv = document.getElementById("unicodeDisplay");
     var infoDiv = document.getElementById("unicodeInfo");
-    
+    displayDiv.style.opacity = "1";
+    infoDiv.style.opacity = "1";
+    fader();
+
     var nextSymbol = getNextSymbol(filter);
     var htmlCode = "&#x" + nextSymbol[0] + ";";
     displayDiv.innerHTML = htmlCode;
@@ -23,6 +35,8 @@ function unicodeDisplay() {
     console.log(displayDiv.innerText, htmlCode);
     console.log(nextSymbol[1]);
     console.log(" ");
+
+    setTimeout(unicodeDisplay, displayLength);
 }
 
 function getNextSymbol(filter = null) {
@@ -39,6 +53,15 @@ function getNextSymbol(filter = null) {
     var charIndex = Math.floor(unicodeData.data.length * Math.random());
     var char = unicodeData.data[charIndex];
     return char.split(";");
+}
+
+function fader() {
+    setTimeout(() => {
+        var displayDiv = document.getElementById("unicodeDisplay");
+        var infoDiv = document.getElementById("unicodeInfo");
+        displayDiv.style.opacity = 0;
+        infoDiv.style.opacity = 0;
+    }, displayLength - fadeTime);
 }
 
 function setupCanvas() {
@@ -108,6 +131,7 @@ function isMissingGlyph(innerText) {
     var maxX = -1;
     var maxY = -1;
 
+    // find min / max values of all colored pixels
     for (var i = 0; i < imgData.length; i += 4) {
         if (imgData[i] !== 0) {
 
@@ -132,6 +156,7 @@ function isMissingGlyph(innerText) {
         }
     }
 
+    // Check if interor of square is uncolored
     var hasColorInside = false;
     var leftBound = minX + sideWidth,
         rightBound = maxX - sideWidth,
@@ -149,6 +174,7 @@ function isMissingGlyph(innerText) {
         return true;
     }
 
+    // given max / min values and the side width, predict area of hollow square
     var area = 
         ((maxX - minX) * (maxY - minY)) - 
         ((maxX - minX - (sideWidth * 2)) * (maxY - minY - (sideWidth * 2)));

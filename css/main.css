@@ -1,5 +1,5 @@
 body {
-    background-color: rgb(34, 34, 34); //#313639;
+    background-color:#FAF7F0; /* #f9f1f1; rgb(24, 24, 24); rgb(34, 34, 34); */
 }
 
 .wrapper {
@@ -14,18 +14,20 @@ body {
 #output {
     display: none;
 }
-
 #testDisplay {
     display: none;
 }
-
 #myCanvas {
     background-color: white; 
     display: none;
 }
 
+#sidePanel {
+    width: 200px;
+}
+
 #unicodeDisplay {
-    color: rgba(248, 240, 227, 0.75);
+    color: rgb(24, 24, 24); /* rgba(248, 240, 227, 1); */
     width: 300px; 
     height: 300px; 
     font-size: 160px; 
@@ -35,7 +37,8 @@ body {
 }
 
 #unicodeInfo {
-    color: rgba(248, 240, 227, 0.75);
-    font-size: 20px; 
+    color: rgb(24, 24, 24); /* rgba(248, 240, 227, 1); */
+    font-size: 28px; 
     padding-top: 30px
 }
+  
